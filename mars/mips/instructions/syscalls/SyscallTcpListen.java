@@ -55,4 +55,12 @@ public class SyscallTcpListen extends AbstractSyscall {
             return servers.remove(handle);
         }
     }
+
+    public static Map<Integer, ServerSocket> getServerHandleMap() {
+        return servers;
+    }
+
+    public static void resetServerHandleCounter() {
+        nextHandle = 100;
+    }
 }

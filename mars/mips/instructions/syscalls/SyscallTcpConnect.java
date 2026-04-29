@@ -89,6 +89,13 @@ public class SyscallTcpConnect extends AbstractSyscall {
         int handle = nextHandle++;
         sockets.put(handle, socket);
         return handle;
+        }
     }
-}
+    public static Map<Integer, Socket> getSocketHandleMap() {
+            return sockets;
+        }
+
+        public static void resetSocketHandleCounter() {
+            nextHandle = 3;
+        }
 }
