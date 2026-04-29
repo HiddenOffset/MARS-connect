@@ -83,4 +83,12 @@ public class SyscallTcpConnect extends AbstractSyscall {
             return sockets.remove(handle);
         }
     }
+
+    public static int addAcceptedSocket(Socket socket) {
+    synchronized (sockets) {
+        int handle = nextHandle++;
+        sockets.put(handle, socket);
+        return handle;
+    }
+}
 }
