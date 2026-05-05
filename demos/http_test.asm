@@ -1,8 +1,8 @@
 .data
-host: .asciiz "example.com"
+host: .asciiz "wttr.in"
 
-# HTTP/1.0 request (simple + closes connection after response).
-req:  .asciiz "GET / HTTP/1.0\r\nHost: example.com\r\n\r\n"
+# HTTP/1.0 request to wttr.in for San Diego weather (format %f)
+req:  .asciiz "GET /San_Diego_CA?format=%f HTTP/1.0\r\nHost: wttr.in\r\n\r\n"
 
 buf:  .space 2048
 
@@ -36,7 +36,7 @@ main:
     li   $v0, 1003
     move $a0, $s0
     la   $a1, req
-    li   $a2, 37          # length of request string
+    li   $a2, 52          # length of request string
     syscall
     move $s1, $v0
 
