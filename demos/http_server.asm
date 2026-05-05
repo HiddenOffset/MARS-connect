@@ -6,11 +6,13 @@ msg_listen: .asciiz "\nListening on port 8080...\n"
 msg_conn:   .asciiz "Client connected\n"
 msg_fail:   .asciiz "Server setup failed\n"
 
+
+# HTTP response format: PROTOCOL/VERSION STATUS_CODE REASON_PHASE\r\n Headers\r\n\r\n Contents
 resp: .asciiz "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello from MIPS!</h1><p>This is your <i>HTTP</i> server!</p></body></html>\n"
 
 .text
 main:
-    # --- reset once at startup ---
+    # Reset the IDE to a known state by closing all open files and sockets
     li   $v0, 1000
     syscall
     move $s7, $v0
@@ -23,10 +25,11 @@ main:
     move $a0, $s7
     syscall
 
-    # --- listen once ---
-    li   $v0, 1005
-    li   $a0, 8080
+    # Create a TCP socket and listen on port 8080
+    li   $v0, 1005 # SyscallTcpListen
+    li   $a0, 8080 # Argument for port number
     syscall
+
     move $s0, $v0
     bltz $s0, failed
 
@@ -35,47 +38,53 @@ main:
     syscall
 
 server_loop:
-    # --- accept one client ---
-    li   $v0, 1006
+    # Run the accept syscall to accept a client connection
+    # NOTE: as of right now this is a blocking syscall, and will not return until a client connects
+    li   $v0, 1006 # SyscallTcpAccept
     move $a0, $s0
     syscall
+
     move $s1, $v0
-    bltz $s1, server_loop
+    bltz $s1, server_loop # Restart loop if accept failed
 
     li   $v0, 4
-    la   $a0, msg_conn
+    la   $a0, msg_conn # Success message
     syscall
 
-    # --- recv request (ignored) ---
-    li   $v0, 1004
-    move $a0, $s1
-    la   $a1, buf
-    li   $a2, 1024
+    # Receive the HTTP request from the client
+    # NOTE: we are currently not parsing the request and just responding with a static HTML page
+    li   $v0, 1004 # SyscallTcpRecv
+    move $a0, $s1 # Client handle (returned from accept)
+    la   $a1, buf # Pointer to buffer for request data
+    li   $a2, 1024 # Max number of bytes to receive
     syscall
+    
     move $s2, $v0
 
-    # if recv failed, just close client and continue
+    # Close the client connection if recv failed or client closed connection
     bltz $s2, close_client
 
-    # --- send HTML response ---
-    move $a0, $s1
+    # Get the length of the response string to send back to the client
     la   $a1, resp
     jal  strlen          # length returned in $v0
     move $a2, $v0
-    li   $v0, 1003
-    move $a0, $s1
-    la   $a1, resp
+
+    # Send the HTTP response back to the client with the response string and calculated length
+    li   $v0, 1003 # SyscallTcpSend
+    move $a0, $s1 # Connection handle
+    la   $a1, resp # Pointer to response string
     syscall
 
 close_client:
-    # --- close this client connection ---
-    li   $v0, 1002
-    move $a0, $s1
+    # Close the client connection
+    li   $v0, 1002 # SyscallTcpClose
+    move $a0, $s1 # Client handle
     syscall
 
-    # --- go wait for next client ---
+    # Go back to waiting for a new connection
     j    server_loop
 
+# Failed message
 failed:
     li   $v0, 4
     la   $a0, msg_fail
@@ -83,7 +92,8 @@ failed:
 
     li   $v0, 10
     syscall
-    
+
+# Helper function to calculate the length of a null-terminated string
 strlen:
     move $t0, $a1      # pointer
     li   $v0, 0        # length = 0
