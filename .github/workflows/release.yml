@@ -1,0 +1,36 @@
+name: Build MARS
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Compile
+        run: |
+          javac Mars.java
+
+      - name: Build runnable JAR
+        run: |
+          jar cfm Mars.jar mainclass.txt \
+            Mars.class mars META-INF docs help images \
+            *.properties *.txt *.xml
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mars.jar
+          path: Mars.jar
