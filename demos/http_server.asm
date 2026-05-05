@@ -1,5 +1,5 @@
 .data
-buf: .space 1024
+buf: .space 1024 # Reserve some space in memory to store incoming/outgoing HTTP request data
 
 msg_reset:  .asciiz "reset closed: "
 msg_listen: .asciiz "\nListening on port 8080...\n"
@@ -17,6 +17,7 @@ main:
     syscall
     move $s7, $v0
 
+    # Print the result of the reset syscall for debugging
     li   $v0, 4
     la   $a0, msg_reset
     syscall
@@ -25,13 +26,13 @@ main:
     move $a0, $s7
     syscall
 
-    # Create a TCP socket and listen on port 8080
+    # Create a TCP socket and listen on port 8080 (port above 1024 to avoid root permissions on POSIX-like systems)
     li   $v0, 1005 # SyscallTcpListen
     li   $a0, 8080 # Argument for port number
     syscall
 
     move $s0, $v0
-    bltz $s0, failed
+    bltz $s0, failed # If socket creation/listen failed, exit with failure message
 
     li   $v0, 4
     la   $a0, msg_listen
