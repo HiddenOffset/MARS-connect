@@ -5,39 +5,22 @@ Short, portable MIPS assembler / simulator used for teaching and experimenting w
 **Quick summary**
 - **What:** Educational MIPS simulator (GUI + CLI) and tools.
 - **Language:** Java (plain .java sources in project root and `mars/`).
-- **Run:** Build then run the `Mars` entry point.
+- **Run:** Download, extract, and run — demos included out of the box.
 
 **Quickstart**
-- **Prerequisites:** Java JDK (11+ recommended) installed and `java`/`javac` on PATH.
-- **Build (Windows):**
+- **Prerequisites:** Java JDK (11+ recommended) installed and `java` on PATH.
 
-```powershell
-compile.bat
-```
-
-- **Run:**
-
-```powershell
-java -cp . Mars
-```
-
-If you prefer to build manually, compile the sources and then run `Mars`:
-
-```powershell
-javac -d . Mars.java
-javac -d . mars\\**\\*.java
-java -cp . Mars
-```
-
-**Binary Release (no compile required)**
-- A prebuilt executable JAR of MARS is available from the project's Releases page or the project website (see project website at https://dpetersanderson.github.io/). You do not have to compile the source yourself to run MARS.
-- Download the `Mars.jar` (or similarly named release artifact) and run:
+1. Go to the [Releases](../../releases) page and download the latest `.zip` file.
+2. Extract the zip to any folder.
+3. Run MARS:
 
 ```powershell
 java -jar Mars.jar
 ```
 
-- If you prefer to build the JAR yourself, use the provided `CreateMarsJar.bat` script which packages the necessary files and includes the main-class manifest entry.
+That's it! The `demos/` folder is included in the zip — open any `.asm` file from there via **File → Open** to get started right away.
+
+**No compiling required. Everything is ready to go.**
 
 **Files of interest**
 - **Mars.java:** main entry point (launcher). See [Mars.java](Mars.java).
